@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Base oscura — fondo dominante de portada, cierre y bloques de énfasis */
+  --sp-navy:        #2C3842;  /* azul carbón, color madre de la marca */
+  --sp-navy-deep:   #25313C;  /* variante más profunda, para vignettes y sombras */
+  --sp-navy-soft:   #323E49;  /* hover de superficies oscuras */
+
+  /* Azul acero — segundo color estructural (paneles, tablas, eyebrows) */
+  --sp-steel:       #526778;  /* paneles laterales, encabezado de tabla, kickers */
+  --sp-steel-ink:   #3E4D5B;  /* color de TEXTO de cuerpo sobre fondo claro */
+  --sp-steel-mute:  #72828E;  /* texto secundario / metadatos */
+
+  /* Base clara — fondo dominante de las secciones informativas */
+  --sp-cream:       #F7F2EB;  /* crema cálido, fondo principal claro */
+  --sp-white:       #FFFFFF;  /* tarjetas y planos sobre crema */
+
+  /* Acentos */
+  --sp-sand:        #C6B799;  /* arena/dorado mate — banda CTA, subrayados, viñetas */
+  --sp-ivory:       #EADFC7;  /* marfil cálido — TITULARES sobre fondo navy */
+  --sp-gold:        #D6A44B;  /* dorado del logotipo — usar con MUCHA moderación */
+
+  /* Estado */
+  --sp-sold:        #A4443B;  /* terracota apagado — etiqueta VENDIDO */
+}
+
+/* Base resets & typography */
+html {
+  scroll-behavior: auto; /* Managed by Lenis */
+  background-color: var(--sp-navy);
+  color: var(--sp-steel-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  overflow-x: hidden;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  background-color: var(--sp-navy);
+}
+
+/* Tabular figures for exact alignment in numbers, tables, meters */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus styles for strict accessibility */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--sp-sand);
+  outline-offset: 3px;
+}
+
+/* Reading Progress Bar */
+#reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--sp-sand);
+  z-index: 100;
+  transform-origin: 0% 50%;
+  width: 100%;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+
+/* Selection */
+::selection {
+  background: var(--sp-sand);
+  color: var(--sp-navy);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--sp-navy-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--sp-steel);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sp-sand);
+}
+
+/* Smooth reveal masks */
+.line-mask {
+  overflow: hidden;
+  display: block;
+}
+
+/* Hero Shimmer Effect on Logo */
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(25deg);
+  }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(214, 164, 75, 0.18) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%) rotate(25deg);
+  animation: shimmer-sweep 1.8s ease-in-out 1.2s forwards;
+  pointer-events: none;
+}
+
+/* Subtle Hero Scroll Indicator bounce */
+@keyframes subtle-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.animate-subtle-bounce {
+  animation: subtle-bounce 2s ease-in-out infinite;
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-subtle-bounce,
+  .animate-shimmer::after {
+    animation: none !important;
+  }
+}
