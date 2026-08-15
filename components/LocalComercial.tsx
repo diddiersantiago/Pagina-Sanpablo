@@ -157,22 +157,25 @@ export default function LocalComercial() {
                           key={local.unidad}
                           className={
                             disponible
-                              ? "disponible-highlight bg-sp-sand/10 border-l-4 border-l-sp-sand"
-                              : "bg-sp-cream/40"
+                              ? "disponible-highlight bg-sp-sand/20 border-l-4 border-l-sp-gold transition-colors"
+                              : "bg-sp-cream/40 opacity-75"
                           }
                         >
                           <th scope="row" className="px-4 py-4 text-left align-middle">
                             <span
                               className={
                                 disponible
-                                  ? "font-display text-sp-navy text-base font-medium block"
+                                  ? "font-display text-sp-navy text-base font-semibold block flex items-center gap-2"
                                   : "font-display text-sp-steel text-base line-through block"
                               }
                             >
+                              {disponible && (
+                                <span className="w-2 h-2 rounded-full bg-sp-gold animate-glow-pulse" />
+                              )}
                               {local.unidad}
                             </span>
                             {disponible && (
-                              <span className="font-sans text-xs text-sp-steel-ink font-light">
+                              <span className="font-sans text-xs text-sp-steel-ink font-normal block mt-0.5">
                                 {localComercial.detalles.salonPrincipal} ·{" "}
                                 {localComercial.detalles.accesos}
                               </span>
@@ -181,7 +184,7 @@ export default function LocalComercial() {
                           <td
                             className={`px-4 py-4 text-right align-middle font-sans text-sm tabular-nums ${
                               disponible
-                                ? "font-medium text-sp-navy"
+                                ? "font-semibold text-sp-navy text-base"
                                 : "text-sp-steel"
                             }`}
                           >
@@ -189,11 +192,11 @@ export default function LocalComercial() {
                           </td>
                           <td className="px-4 py-4 text-right align-middle">
                             {disponible ? (
-                              <span className="inline-block px-3 py-1 bg-sp-navy text-sp-ivory font-sans text-xs font-medium uppercase tracking-wider">
+                              <span className="inline-block px-3 py-1.5 bg-sp-navy text-sp-ivory font-sans text-xs font-semibold uppercase tracking-wider shadow-sm border border-sp-gold/40">
                                 Disponible
                               </span>
                             ) : (
-                              <span className="stamp-vendido inline-block px-2.5 py-0.5 bg-sp-sold text-white font-sans text-[0.7rem] uppercase tracking-wider font-semibold -rotate-3">
+                              <span className="stamp-vendido inline-block px-2.5 py-0.5 bg-sp-sold text-white font-sans text-[0.7rem] uppercase tracking-wider font-bold -rotate-3 border border-white/30 shadow-sm">
                                 VENDIDO
                               </span>
                             )}
@@ -206,9 +209,10 @@ export default function LocalComercial() {
               </div>
 
               {/* Outstanding Figure Box */}
-              <div className="p-5 bg-sp-navy text-sp-ivory flex items-center justify-between">
+              <div className="p-6 bg-sp-navy text-sp-ivory flex items-center justify-between shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sp-sand via-sp-gold to-sp-sand" />
                 <div>
-                  <span className="font-sans text-[0.7rem] uppercase tracking-wider text-sp-sand block">
+                  <span className="font-sans text-[0.7rem] uppercase tracking-wider text-sp-sand font-medium block mb-0.5">
                     Área Total Disponible
                   </span>
                   <span className="font-display text-2xl sm:text-3xl text-sp-ivory font-normal tabular-nums">
@@ -216,10 +220,10 @@ export default function LocalComercial() {
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="font-sans text-[0.7rem] uppercase tracking-wider text-sp-sand block">
+                  <span className="font-sans text-[0.7rem] uppercase tracking-wider text-sp-sand font-medium block mb-0.5">
                     Valor · Local 1
                   </span>
-                  <span className="font-display text-2xl sm:text-3xl text-sp-ivory font-normal tabular-nums">
+                  <span className="font-display text-2xl sm:text-3xl text-sp-gold font-normal tabular-nums">
                     {localComercial.detalles.valor}
                   </span>
                 </div>

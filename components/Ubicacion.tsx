@@ -67,8 +67,9 @@ export default function Ubicacion() {
         {/* RIGHT: NAP + datos concretos + mapa */}
         <div ref={rightRef} className="lg:col-span-6 flex flex-col gap-6">
           {/* Dirección — NAP */}
-          <div className="bg-sp-white border border-sp-steel/15 p-6 sm:p-8">
-            <h3 className="font-sans text-[0.72rem] tracking-kicker uppercase text-sp-steel font-normal mb-4">
+          <div className="sp-card-interactive bg-sp-white border border-sp-steel/20 shadow-md p-6 sm:p-8 relative overflow-hidden">
+            <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-sp-navy via-sp-gold to-sp-sand" />
+            <h3 className="font-sans text-[0.72rem] tracking-kicker uppercase text-sp-steel font-medium mb-4">
               Cómo llegar
             </h3>
             <address className="not-italic font-sans text-sp-steel-ink">
@@ -85,9 +86,10 @@ export default function Ubicacion() {
               </span>
               <a
                 href={PROYECTO_DATA.telefonoHref}
-                className="inline-block mt-3 font-medium text-sp-navy border-b border-sp-sand hover:text-sp-steel transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand"
+                className="inline-flex items-center gap-1.5 mt-3 font-semibold text-sp-navy border-b-2 border-sp-gold hover:text-sp-steel transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand"
               >
-                {PROYECTO_DATA.telefonoInternacional}
+                <span>{PROYECTO_DATA.telefonoInternacional}</span>
+                <span className="text-sp-gold">✦</span>
               </a>
             </address>
 
@@ -95,10 +97,10 @@ export default function Ubicacion() {
               <dl className="mt-6 pt-6 border-t border-sp-steel/15 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {datos.map((d) => (
                   <div key={d.termino} className="flex flex-col">
-                    <dt className="font-sans text-[0.68rem] uppercase tracking-wider text-sp-steel">
+                    <dt className="font-sans text-[0.68rem] uppercase tracking-wider text-sp-steel font-medium">
                       {d.termino}
                     </dt>
-                    <dd className="font-display text-sp-navy text-lg tabular-nums">
+                    <dd className="font-display text-sp-navy text-lg tabular-nums font-medium">
                       {d.valor}
                     </dd>
                   </div>
@@ -110,7 +112,7 @@ export default function Ubicacion() {
               href={PROYECTO_DATA.whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center mt-6 px-6 py-3.5 bg-sp-navy text-sp-ivory hover:bg-sp-navy-deep font-sans text-sm tracking-wider uppercase font-medium transition-colors min-h-[48px] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand"
+              className="inline-flex items-center justify-center mt-6 px-6 py-3.5 bg-gradient-to-r from-sp-sand via-sp-gold to-sp-sand text-sp-navy font-sans text-sm tracking-wider uppercase font-semibold transition-all duration-300 hover:brightness-105 hover:-translate-y-0.5 shadow-md hover:shadow-lg min-h-[48px] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand"
             >
               Pedir la ruta por WhatsApp
             </a>

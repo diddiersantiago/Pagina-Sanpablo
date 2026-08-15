@@ -120,16 +120,23 @@ export default function Inversion() {
           {inversion.tarjetas.map((tarjeta, idx) => (
             <div
               key={tarjeta.tipo}
-              className="tarjeta-inversion relative bg-sp-navy-soft p-6 sm:p-8 border border-white/10 flex flex-col justify-between overflow-hidden"
+              className="sp-card-dark-interactive relative bg-gradient-to-b from-sp-navy-soft to-sp-navy-deep p-6 sm:p-8 border border-white/15 hover:border-sp-gold/60 shadow-xl flex flex-col justify-between overflow-hidden group"
             >
-              <span className="absolute top-0 left-0 right-0 h-[2px] bg-sp-sand" />
+              <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-sp-sand via-sp-gold to-sp-sand" />
               <div>
-                <span className="font-sans text-xs uppercase tracking-wider text-sp-sand font-medium block mb-3">
-                  {tarjeta.titulo}
-                </span>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-sans text-xs uppercase tracking-wider text-sp-sand font-medium">
+                    {tarjeta.titulo}
+                  </span>
+                  {tarjeta.tipo === "esquinera" && (
+                    <span className="text-[0.65rem] uppercase font-sans font-semibold tracking-wider px-2 py-0.5 bg-sp-gold/20 text-sp-gold border border-sp-gold/40">
+                      Destacada
+                    </span>
+                  )}
+                </div>
                 <div className="mb-4 flex items-baseline">
                   {/* min-w reserva el ancho: el conteo no desplaza "millones" */}
-                  <span className="font-display text-3xl sm:text-4xl lg:text-5xl text-sp-ivory font-normal tabular-nums inline-block min-w-[4ch]">
+                  <span className="font-display text-3xl sm:text-4xl lg:text-5xl text-sp-ivory font-normal tabular-nums inline-block min-w-[4ch] group-hover:text-sp-gold transition-colors">
                     ${precios[idx]}
                   </span>
                   <span className="font-display text-sp-sand text-xl sm:text-2xl ml-1 font-normal">
@@ -142,16 +149,17 @@ export default function Inversion() {
               </div>
 
               <div className="pt-6 mt-6 border-t border-white/10 flex items-center justify-between gap-3">
-                <span className="font-sans text-[0.68rem] uppercase tracking-wider text-sp-sand">
+                <span className="font-sans text-[0.68rem] uppercase tracking-wider text-sp-sand font-medium">
                   {piesTarjeta[idx]}
                 </span>
                 <a
                   href={PROYECTO_DATA.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-sans text-[0.68rem] uppercase tracking-wider text-sp-ivory border-b border-sp-sand/50 hover:border-sp-sand hover:text-sp-sand transition-colors pb-0.5 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand"
+                  className="inline-flex items-center gap-1 font-sans text-xs uppercase tracking-wider text-sp-ivory hover:text-sp-gold border-b border-sp-sand/50 hover:border-sp-gold transition-colors pb-0.5 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand font-medium"
                 >
-                  Consultar
+                  <span>Consultar</span>
+                  <span className="text-sp-gold">→</span>
                   <span className="sr-only"> por {tarjeta.titulo} por WhatsApp</span>
                 </a>
               </div>
@@ -164,10 +172,10 @@ export default function Inversion() {
           {inversion.notas.map((nota, idx) => (
             <div
               key={idx}
-              className="flex items-start gap-3 p-4 bg-sp-navy-soft/60 border border-white/10"
+              className="flex items-start gap-3 p-4 bg-sp-navy-soft/60 border border-white/10 rounded-sm"
             >
               <span
-                className="mt-1.5 h-2 w-2 shrink-0 bg-sp-sand"
+                className="mt-1.5 h-2 w-2 shrink-0 bg-sp-gold rotate-45"
                 aria-hidden="true"
               />
               <p className="font-sans text-xs text-white/90 font-light leading-relaxed">
@@ -177,16 +185,16 @@ export default function Inversion() {
           ))}
         </div>
 
-        {/* Full-width CTA Band (Background --sp-sand) */}
+        {/* Full-width CTA Band (Background --sp-sand to gold gradient) */}
         <div
           ref={ctaBandRef}
-          className="relative w-full bg-sp-sand text-sp-navy p-6 sm:p-8 lg:p-10 flex flex-col md:flex-row items-center justify-between gap-6"
+          className="relative w-full bg-gradient-to-r from-sp-sand via-sp-gold to-sp-sand text-sp-navy p-6 sm:p-8 lg:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl overflow-hidden border border-sp-gold/40"
         >
           <div className="flex flex-col text-center md:text-left">
             <span className="font-sans text-[0.7rem] uppercase tracking-kicker font-bold text-sp-navy/90 mb-1">
               {inversion.cta.kicker}
             </span>
-            <p className="font-display italic text-lg sm:text-xl lg:text-2xl text-sp-navy font-medium leading-snug">
+            <p className="font-display italic text-lg sm:text-xl lg:text-2xl text-sp-navy font-semibold leading-snug">
               {inversion.cta.texto}
             </p>
           </div>
@@ -196,11 +204,11 @@ export default function Inversion() {
               href={PROYECTO_DATA.whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-4 bg-sp-navy text-sp-ivory hover:bg-sp-navy-deep font-sans text-base sm:text-lg tracking-wider uppercase font-semibold transition-colors duration-300 group focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-navy min-h-[48px]"
+              className="inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-4 bg-sp-navy text-sp-ivory hover:bg-sp-navy-deep font-sans text-base sm:text-lg tracking-wider uppercase font-semibold transition-all duration-300 group shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-navy min-h-[48px]"
               aria-label={`Escribir por WhatsApp al ${PROYECTO_DATA.telefonoInternacional}`}
             >
-              <MessageCircle className="w-6 h-6 text-sp-sand" />
-              <span className="group-hover:text-sp-sand transition-colors font-medium">
+              <MessageCircle className="w-6 h-6 text-sp-gold group-hover:scale-110 transition-transform" />
+              <span className="group-hover:text-sp-gold transition-colors font-medium">
                 {inversion.cta.telefono}
               </span>
             </a>
@@ -208,7 +216,7 @@ export default function Inversion() {
             {/* En móvil, llamar de un toque */}
             <a
               href={PROYECTO_DATA.telefonoHref}
-              className="inline-flex items-center justify-center px-6 py-4 border-2 border-sp-navy text-sp-navy hover:bg-sp-navy hover:text-sp-ivory font-sans text-sm tracking-wider uppercase font-medium transition-colors duration-300 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-navy min-h-[48px]"
+              className="inline-flex items-center justify-center px-6 py-4 border-2 border-sp-navy text-sp-navy hover:bg-sp-navy hover:text-sp-ivory font-sans text-sm tracking-wider uppercase font-semibold transition-all duration-300 hover:scale-[1.02] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-navy min-h-[48px]"
             >
               Llamar
               <span className="sr-only"> al {PROYECTO_DATA.telefonoInternacional}</span>

@@ -42,22 +42,24 @@ export default function Faq() {
           </h2>
         </div>
 
-        <div ref={listRef} className="border-t border-sp-steel/20">
+        <div ref={listRef} className="border-t border-sp-steel/20 divide-y divide-sp-steel/15">
           {faq.preguntas.map((item) => (
             <details
               key={item.pregunta}
-              className="group border-b border-sp-steel/20"
+              className="group py-1 transition-colors"
             >
-              <summary className="flex items-start justify-between gap-4 cursor-pointer list-none py-5 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand">
-                <h3 className="font-display text-sp-navy text-lg sm:text-xl font-normal leading-snug">
+              <summary className="flex items-start justify-between gap-4 cursor-pointer list-none py-5 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand select-none">
+                <h3 className="font-display text-sp-navy group-hover:text-sp-steel group-open:text-sp-navy text-lg sm:text-xl font-medium leading-snug transition-colors">
                   {item.pregunta}
                 </h3>
-                <ChevronDown
-                  className="w-5 h-5 mt-1 shrink-0 text-sp-steel transition-transform duration-300 group-open:rotate-180"
-                  aria-hidden="true"
-                />
+                <div className="p-1 rounded-full bg-sp-sand/15 group-hover:bg-sp-sand/30 group-open:bg-sp-gold/20 transition-colors shrink-0 mt-0.5">
+                  <ChevronDown
+                    className="w-4 h-4 text-sp-steel group-open:text-sp-gold transition-transform duration-300 group-open:rotate-180"
+                    aria-hidden="true"
+                  />
+                </div>
               </summary>
-              <p className="font-sans font-light text-sp-steel-ink text-[1.02rem] leading-[1.75] pb-6 pr-8 max-w-prose">
+              <p className="font-sans font-light text-sp-steel-ink text-[1.02rem] leading-[1.75] pb-6 pr-8 max-w-prose animate-fade-in">
                 {item.respuesta}
               </p>
             </details>
@@ -70,7 +72,7 @@ export default function Faq() {
             href={PROYECTO_DATA.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="not-italic font-sans font-medium text-sp-navy border-b border-sp-sand hover:text-sp-steel transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand"
+            className="not-italic font-sans font-semibold text-sp-navy border-b-2 border-sp-gold hover:text-sp-steel transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand"
           >
             {PROYECTO_DATA.telefonoInternacional}
           </a>
