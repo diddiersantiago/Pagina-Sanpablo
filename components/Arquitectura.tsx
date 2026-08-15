@@ -105,18 +105,24 @@ export default function Arquitectura() {
 
       {/* Content over image */}
       <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-end">
-        {/* Left: Titles & Lyric copy */}
-        <div ref={textRef} className="lg:col-span-7 flex flex-col">
+        {/* Left: Titles & Lyric copy with Glassmorphism Backdrop Blur for maximum contrast */}
+        <div
+          ref={textRef}
+          className="lg:col-span-7 flex flex-col bg-sp-navy-deep/80 sm:bg-sp-navy-deep/70 backdrop-blur-md border border-white/15 rounded-xl p-6 sm:p-8 lg:p-10 shadow-2xl relative overflow-hidden"
+        >
+          {/* Subtle left sand accent line */}
+          <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-sp-sand" />
+
           <span className="font-sans text-[0.72rem] tracking-kicker uppercase text-sp-sand font-normal mb-2">
             {PROYECTO_DATA.arquitectura.kicker}
           </span>
           <h2
             id="titulo-arquitectura"
-            className="font-display font-normal text-sp-ivory text-[clamp(2.4rem,4.8vw,4.2rem)] leading-[1.02] tracking-tighter uppercase mb-4"
+            className="font-display font-normal text-sp-ivory text-[clamp(2.2rem,4.2vw,3.8rem)] leading-[1.02] tracking-tighter uppercase mb-4"
           >
             {PROYECTO_DATA.arquitectura.titulo}
           </h2>
-          <p className="font-display italic text-white/90 text-[clamp(1.1rem,1.6vw,1.45rem)] leading-lyric max-w-2xl">
+          <p className="font-display italic text-sp-ivory/95 text-[clamp(1.05rem,1.5vw,1.35rem)] leading-lyric max-w-2xl">
             {PROYECTO_DATA.arquitectura.bajada}
           </p>
         </div>
