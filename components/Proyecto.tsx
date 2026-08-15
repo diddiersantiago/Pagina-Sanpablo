@@ -4,26 +4,34 @@ import { useEffect, useRef, useState } from "react";
 import { PROYECTO_DATA } from "@/data/proyecto";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "@/lib/animations";
-import { Home, Layers, CheckCircle2 } from "lucide-react";
+import {
+  prefersReducedMotion,
+  useCountUp,
+  EASING,
+  DURATION,
+} from "@/lib/animations";
+
+const TOTALES = PROYECTO_DATA.areas.tipologias.map((t) => t.totalNum);
+const fmt = (n: number) => n.toFixed(2).replace(".", ",");
 
 export default function Proyecto() {
   const sectionRef = useRef<HTMLElement>(null);
   const kickerLineRef = useRef<HTMLDivElement>(null);
   const visPanelRef = useRef<HTMLDivElement>(null);
+  // Trigger del contador: la columna derecha está SIEMPRE visible.
+  // `.tabla-areas-container` es hidden sm:block — bajo 480px nunca dispara.
+  const colRightRef = useRef<HTMLDivElement>(null);
 
-  // Counter states for animated numbers
-  const [totalEsquinera, setTotalEsquinera] = useState("0,00");
-  const [totalMedianera, setTotalMedianera] = useState("0,00");
-  const [totalLocal, setTotalLocal] = useState("0,00");
+  // Estado inicial = valor final. El HTML del servidor emite 79,92 / 75,57 /
+  // 70,40 en lugar de "0,00", y el ancho de la columna no salta al animar.
+  const [totales, setTotales] = useState<string[]>(() => TOTALES.map(fmt));
+
+  useCountUp(colRightRef, TOTALES, (values) => setTotales(values.map(fmt)), {
+    start: "top 85%",
+  });
 
   useEffect(() => {
-    if (prefersReducedMotion()) {
-      setTotalEsquinera("79,92");
-      setTotalMedianera("75,57");
-      setTotalLocal("70,40");
-      return;
-    }
+    if (prefersReducedMotion()) return;
 
     gsap.registerPlugin(ScrollTrigger);
 
@@ -36,7 +44,7 @@ export default function Proyecto() {
           {
             scaleX: 1,
             duration: 0.8,
-            ease: "expo.out",
+            ease: EASING.default,
             scrollTrigger: {
               trigger: sectionRef.current,
               start: "top 80%",
@@ -53,8 +61,8 @@ export default function Proyecto() {
         {
           opacity: 1,
           x: 0,
-          duration: 0.9,
-          ease: "expo.out",
+          duration: DURATION.text,
+          ease: EASING.default,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 75%",
@@ -69,9 +77,9 @@ export default function Proyecto() {
         {
           opacity: 1,
           x: 0,
-          duration: 0.9,
+          duration: DURATION.text,
           delay: 0.12,
-          ease: "expo.out",
+          ease: EASING.default,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 75%",
@@ -88,8 +96,8 @@ export default function Proyecto() {
           {
             clipPath: "inset(0% 0 0 0)",
             opacity: 1,
-            duration: 0.9,
-            ease: "power3.out",
+            duration: DURATION.text,
+            ease: EASING.entrance,
             scrollTrigger: {
               trigger: visPanelRef.current,
               start: "top 85%",
@@ -99,29 +107,7 @@ export default function Proyecto() {
         );
       }
 
-      // 4. Number Counters for Table
-      const counterObj = { v1: 0, v2: 0, v3: 0 };
-      ScrollTrigger.create({
-        trigger: ".tabla-areas-container",
-        start: "top 85%",
-        once: true,
-        onEnter: () => {
-          gsap.to(counterObj, {
-            v1: 79.92,
-            v2: 75.57,
-            v3: 70.4,
-            duration: 1.2,
-            ease: "power2.out",
-            onUpdate: () => {
-              setTotalEsquinera(counterObj.v1.toFixed(2).replace(".", ","));
-              setTotalMedianera(counterObj.v2.toFixed(2).replace(".", ","));
-              setTotalLocal(counterObj.v3.toFixed(2).replace(".", ","));
-            },
-          });
-        },
-      });
-
-      // 5. White cards top border scale
+      // 4. White cards top border scale
       gsap.fromTo(
         ".tarjeta-top-border",
         { scaleX: 0 },
@@ -129,7 +115,7 @@ export default function Proyecto() {
           scaleX: 1,
           duration: 0.8,
           stagger: 0.15,
-          ease: "expo.out",
+          ease: EASING.default,
           scrollTrigger: {
             trigger: ".tarjetas-tipologia",
             start: "top 85%",
@@ -185,26 +171,24 @@ export default function Proyecto() {
             {/* VIS Informational Box (Steel background panel) */}
             <div
               ref={visPanelRef}
-              className="relative bg-sp-steel text-white rounded-lg p-6 sm:p-8 shadow-xl overflow-hidden"
+              className="relative bg-sp-steel text-white p-6 sm:p-8 overflow-hidden shadow-xl"
             >
-              {/* Subtle top accent bar */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-sp-sand" />
+              {/* Gold gradient top accent bar */}
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-sp-sand via-sp-gold to-sp-sand" />
 
-              <div className="flex items-center gap-2 mb-6">
-                <CheckCircle2 className="w-5 h-5 text-sp-sand flex-shrink-0" />
-                <h3 className="font-display text-sp-ivory text-lg sm:text-xl font-normal uppercase tracking-tight">
-                  {PROYECTO_DATA.vis.titulo}
-                </h3>
-              </div>
+              <h3 className="font-display text-sp-ivory text-lg sm:text-xl font-normal uppercase tracking-tight mb-6">
+                {PROYECTO_DATA.vis.titulo}
+              </h3>
 
               {/* 2x2 Grid for 4 VIS Key Points */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 mb-6">
                 {PROYECTO_DATA.vis.puntos.map((p, idx) => (
-                  <div key={idx} className="flex flex-col">
-                    <p className="font-sans text-sp-ivory text-sm font-medium tracking-wide mb-1">
+                  <div key={idx} className="flex flex-col group">
+                    <p className="font-sans text-sp-ivory text-sm font-medium tracking-wide mb-1 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-sp-gold inline-block shrink-0 group-hover:scale-125 transition-transform" />
                       {p.titulo}
                     </p>
-                    <p className="font-sans text-xs text-white/80 font-light leading-relaxed">
+                    <p className="font-sans text-xs text-white/90 font-light leading-relaxed pl-3">
                       {p.texto}
                     </p>
                   </div>
@@ -213,7 +197,7 @@ export default function Proyecto() {
 
               {/* Footnote on Subsidies */}
               <div className="pt-4 border-t border-white/15">
-                <p className="font-sans text-[0.75rem] text-sp-ivory/90 font-light italic leading-normal">
+                <p className="font-display italic text-[0.8rem] text-sp-ivory/90 font-normal leading-normal">
                   {PROYECTO_DATA.vis.nota}
                 </p>
               </div>
@@ -221,75 +205,73 @@ export default function Proyecto() {
           </div>
 
           {/* RIGHT COLUMN: Areas Table + Typology Highlight Cards */}
-          <div className="proyecto-col-right lg:col-span-6 flex flex-col">
+          <div
+            ref={colRightRef}
+            className="proyecto-col-right lg:col-span-6 flex flex-col"
+          >
             <div className="inline-flex flex-col mb-4">
-              <span className="font-sans text-[0.72rem] tracking-kicker uppercase text-sp-steel font-normal">
+              <h3 className="font-sans text-[0.72rem] tracking-kicker uppercase text-sp-steel font-medium">
                 {PROYECTO_DATA.areas.kicker}
-              </span>
-              <div className="w-16 h-[1px] bg-sp-steel/30 mt-1" />
+              </h3>
+              <div className="w-16 h-[1.5px] bg-gradient-to-r from-sp-gold to-sp-sand mt-1" />
             </div>
 
             {/* Desktop Table View */}
-            <div className="tabla-areas-container hidden sm:block bg-sp-white rounded-lg shadow-md border border-sp-steel/15 overflow-hidden mb-6">
+            <div className="tabla-areas-container hidden sm:block bg-sp-white border border-sp-steel/20 shadow-md overflow-hidden mb-6">
               <table className="w-full text-left border-collapse">
+                <caption className="sr-only">
+                  Áreas por tipología en Urbanización San Pablo, Soracá, Boyacá:
+                  metros cuadrados de primer piso, segundo piso, ampliación de
+                  tercer piso y total por unidad.
+                </caption>
                 <thead>
-                  <tr className="bg-sp-steel text-sp-ivory font-sans text-[0.75rem] uppercase tracking-[0.12em] font-medium border-b border-sp-steel-deep">
-                    <th className="py-3.5 px-4 font-medium">Tipología</th>
-                    <th className="py-3.5 px-3 text-right font-medium">1° Piso</th>
-                    <th className="py-3.5 px-3 text-right font-medium">2° Piso</th>
-                    <th className="py-3.5 px-3 text-right font-medium">3° Piso*</th>
-                    <th className="py-3.5 px-4 text-right font-medium text-sp-sand">
+                  <tr className="bg-sp-steel text-sp-ivory font-sans text-[0.75rem] uppercase tracking-[0.12em] font-medium border-b border-sp-navy/30">
+                    <th scope="col" className="py-3.5 px-4 font-medium">
+                      Tipología
+                    </th>
+                    <th scope="col" className="py-3.5 px-3 text-right font-medium">
+                      1° Piso
+                    </th>
+                    <th scope="col" className="py-3.5 px-3 text-right font-medium">
+                      2° Piso
+                    </th>
+                    <th scope="col" className="py-3.5 px-3 text-right font-medium">
+                      3° Piso*
+                    </th>
+                    <th
+                      scope="col"
+                      className="py-3.5 px-4 text-right font-semibold text-sp-gold"
+                    >
                       Total
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-sp-steel/10 font-sans text-sm text-sp-steel-ink">
-                  {/* Row 1: Casa Esquinera */}
-                  <tr className="transition-colors hover:bg-sp-steel/[0.06] group">
-                    <td className="py-4 px-4 font-medium text-sp-navy">
-                      Casa esquinera
-                    </td>
-                    <td className="py-4 px-3 text-right tabular-nums">31,715</td>
-                    <td className="py-4 px-3 text-right tabular-nums">27,61</td>
-                    <td className="py-4 px-3 text-right tabular-nums text-sp-steel-mute">
-                      20,595
-                    </td>
-                    <td className="py-4 px-4 text-right font-display text-sp-navy text-lg font-normal tabular-nums">
-                      {totalEsquinera} m²
-                    </td>
-                  </tr>
-
-                  {/* Row 2: Casa Medianera */}
-                  <tr className="transition-colors hover:bg-sp-steel/[0.06] group">
-                    <td className="py-4 px-4 font-medium text-sp-navy">
-                      Casa medianera
-                    </td>
-                    <td className="py-4 px-3 text-right tabular-nums">30,385</td>
-                    <td className="py-4 px-3 text-right tabular-nums">25,49</td>
-                    <td className="py-4 px-3 text-right tabular-nums text-sp-steel-mute">
-                      19,69
-                    </td>
-                    <td className="py-4 px-4 text-right font-display text-sp-navy text-lg font-normal tabular-nums">
-                      {totalMedianera} m²
-                    </td>
-                  </tr>
-
-                  {/* Row 3: Local Comercial */}
-                  <tr className="transition-colors hover:bg-sp-steel/[0.06] group">
-                    <td className="py-4 px-4 font-medium text-sp-navy">
-                      Local comercial
-                    </td>
-                    <td className="py-4 px-3 text-right tabular-nums">70,40</td>
-                    <td className="py-4 px-3 text-right tabular-nums text-sp-steel-mute">
-                      —
-                    </td>
-                    <td className="py-4 px-3 text-right tabular-nums text-sp-steel-mute">
-                      —
-                    </td>
-                    <td className="py-4 px-4 text-right font-display text-sp-navy text-lg font-normal tabular-nums">
-                      {totalLocal} m²
-                    </td>
-                  </tr>
+                  {PROYECTO_DATA.areas.tipologias.map((item, idx) => (
+                    <tr key={item.tipologia} className="transition-colors hover:bg-sp-sand/15">
+                      <th
+                        scope="row"
+                        className="py-4 px-4 font-medium text-sp-navy text-left"
+                      >
+                        {item.tipologia}
+                      </th>
+                      <td className="py-4 px-3 text-right tabular-nums">
+                        {item.piso1}
+                      </td>
+                      <td className="py-4 px-3 text-right tabular-nums text-sp-steel">
+                        {item.piso2}
+                      </td>
+                      <td className="py-4 px-3 text-right tabular-nums text-sp-steel">
+                        {item.piso3}
+                      </td>
+                      {/* min-w reserva el ancho de la columna durante el conteo */}
+                      <td className="py-4 px-4 text-right font-display text-sp-navy text-lg font-medium tabular-nums text-sp-navy">
+                        <span className="inline-block min-w-[7ch] text-sp-navy">
+                          {totales[idx]} m²
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -299,29 +281,25 @@ export default function Proyecto() {
               {PROYECTO_DATA.areas.tipologias.map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-sp-white p-4 rounded-lg border border-sp-steel/15 shadow-sm"
+                  className="bg-sp-white p-4 border border-sp-steel/20 shadow-sm"
                 >
                   <div className="flex justify-between items-baseline mb-2 border-b border-sp-steel/10 pb-2">
                     <span className="font-display text-sp-navy text-base font-medium">
                       {item.tipologia}
                     </span>
-                    <span className="font-display text-sp-navy text-xl font-normal tabular-nums">
-                      {idx === 0
-                        ? `${totalEsquinera} m²`
-                        : idx === 1
-                        ? `${totalMedianera} m²`
-                        : `${totalLocal} m²`}
+                    <span className="font-display text-sp-navy text-xl font-normal tabular-nums inline-block min-w-[7ch] text-right">
+                      {totales[idx]} m²
                     </span>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-[0.75rem] font-sans text-sp-steel-ink">
                     <div>
-                      <span className="text-sp-steel-mute block text-[0.68rem] uppercase">
+                      <span className="text-sp-steel block text-[0.68rem] uppercase">
                         1° Piso
                       </span>
                       <span className="font-medium tabular-nums">{item.piso1} m²</span>
                     </div>
                     <div>
-                      <span className="text-sp-steel-mute block text-[0.68rem] uppercase">
+                      <span className="text-sp-steel block text-[0.68rem] uppercase">
                         2° Piso
                       </span>
                       <span className="font-medium tabular-nums">
@@ -329,7 +307,7 @@ export default function Proyecto() {
                       </span>
                     </div>
                     <div>
-                      <span className="text-sp-steel-mute block text-[0.68rem] uppercase">
+                      <span className="text-sp-steel block text-[0.68rem] uppercase">
                         3° Piso*
                       </span>
                       <span className="font-medium tabular-nums text-sp-steel">
@@ -342,20 +320,22 @@ export default function Proyecto() {
             </div>
 
             {/* Table Footnote */}
-            <p className="font-sans text-xs text-sp-steel-mute font-light italic mb-8">
+            <p className="font-display italic text-[0.8rem] text-sp-steel font-normal mb-8">
               {PROYECTO_DATA.areas.notaTabla}
             </p>
 
-            {/* Typology Cards (White background, 2px top Navy border) */}
+            {/* Typology Cards (White background, 2px top Navy & Gold border) */}
             <div className="tarjetas-tipologia grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Esquinera Card */}
-              <div className="relative bg-sp-white p-5 rounded-lg border border-sp-steel/15 shadow-sm overflow-hidden flex flex-col justify-between">
-                <span className="tarjeta-top-border absolute top-0 left-0 right-0 h-[2px] bg-sp-navy origin-left" />
-                <div className="flex items-center gap-2 mb-2 text-sp-navy">
-                  <Home className="w-4 h-4 text-sp-sand" />
-                  <h4 className="font-display text-base uppercase font-medium">
+              <div className="sp-card-interactive relative bg-sp-white p-5 border border-sp-steel/20 shadow-sm overflow-hidden flex flex-col justify-between group">
+                <span className="tarjeta-top-border absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-sp-navy via-sp-gold to-sp-sand origin-left" />
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-display text-base uppercase font-medium text-sp-navy">
                     Casa esquinera
                   </h4>
+                  <span className="text-[0.65rem] uppercase font-sans font-semibold tracking-wider px-2 py-0.5 bg-sp-sand/20 text-sp-steel-ink">
+                    2 frentes
+                  </span>
                 </div>
                 <p className="font-sans text-xs text-sp-steel-ink font-light leading-relaxed">
                   Dos frentes e iluminación adicional.{" "}
@@ -367,13 +347,15 @@ export default function Proyecto() {
               </div>
 
               {/* Medianera Card */}
-              <div className="relative bg-sp-white p-5 rounded-lg border border-sp-steel/15 shadow-sm overflow-hidden flex flex-col justify-between">
-                <span className="tarjeta-top-border absolute top-0 left-0 right-0 h-[2px] bg-sp-navy origin-left" />
-                <div className="flex items-center gap-2 mb-2 text-sp-navy">
-                  <Layers className="w-4 h-4 text-sp-sand" />
-                  <h4 className="font-display text-base uppercase font-medium">
+              <div className="sp-card-interactive relative bg-sp-white p-5 border border-sp-steel/20 shadow-sm overflow-hidden flex flex-col justify-between group">
+                <span className="tarjeta-top-border absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-sp-navy via-sp-gold to-sp-sand origin-left" />
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-display text-base uppercase font-medium text-sp-navy">
                     Casa medianera
                   </h4>
+                  <span className="text-[0.65rem] uppercase font-sans font-semibold tracking-wider px-2 py-0.5 bg-sp-sand/20 text-sp-steel-ink">
+                    Óptima
+                  </span>
                 </div>
                 <p className="font-sans text-xs text-sp-steel-ink font-light leading-relaxed">
                   Entre unidades, óptima en costo.{" "}

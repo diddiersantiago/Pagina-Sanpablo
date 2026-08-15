@@ -4,70 +4,59 @@ import { useEffect, useRef, useState } from "react";
 import { PROYECTO_DATA } from "@/data/proyecto";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "@/lib/animations";
-import { MessageCircle, Square, ArrowUpRight } from "lucide-react";
+import {
+  prefersReducedMotion,
+  useCountUp,
+  EASING,
+  DURATION,
+} from "@/lib/animations";
+import { MessageCircle } from "lucide-react";
+
+const { inversion } = PROYECTO_DATA;
+const PRECIOS_FINALES = inversion.tarjetas.map((t) => t.precioMillones);
 
 export default function Inversion() {
   const sectionRef = useRef<HTMLElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const ctaBandRef = useRef<HTMLDivElement>(null);
 
-  // Animated counters for prices
-  const [precioEsquinera, setPrecioEsquinera] = useState(0);
-  const [precioMedianera, setPrecioMedianera] = useState(0);
-  const [precioLocal, setPrecioLocal] = useState(0);
+  // El estado arranca con el valor final: el HTML del servidor emite $170 /
+  // $147 / $217 y no "$0" (Googlebot ejecuta JS pero no hace scroll). Además
+  // el ancho del número no cambia al animar, así que no hay CLS.
+  const [precios, setPrecios] = useState<number[]>(PRECIOS_FINALES);
+
+  useCountUp(
+    gridRef,
+    PRECIOS_FINALES,
+    (values) => setPrecios(values.map((v) => Math.round(v))),
+    { start: "top 80%" }
+  );
 
   useEffect(() => {
-    if (prefersReducedMotion()) {
-      setPrecioEsquinera(170);
-      setPrecioMedianera(147);
-      setPrecioLocal(217);
-      return;
-    }
+    if (prefersReducedMotion()) return;
 
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-      // 1. Price cards entrance
+      // Entrada de las tarjetas de precio
       gsap.fromTo(
         ".tarjeta-inversion",
         { opacity: 0, y: 28 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.9,
+          duration: DURATION.text,
           stagger: 0.12,
-          ease: "expo.out",
+          ease: EASING.default,
           scrollTrigger: {
-            trigger: ".grid-tarjetas-inversion",
+            trigger: gridRef.current,
             start: "top 80%",
             once: true,
           },
         }
       );
 
-      // 2. Counter animation for the 3 prices
-      const priceObj = { p1: 0, p2: 0, p3: 0 };
-      ScrollTrigger.create({
-        trigger: ".grid-tarjetas-inversion",
-        start: "top 80%",
-        once: true,
-        onEnter: () => {
-          gsap.to(priceObj, {
-            p1: 170,
-            p2: 147,
-            p3: 217,
-            duration: 1.4,
-            ease: "power2.out",
-            onUpdate: () => {
-              setPrecioEsquinera(Math.round(priceObj.p1));
-              setPrecioMedianera(Math.round(priceObj.p2));
-              setPrecioLocal(Math.round(priceObj.p3));
-            },
-          });
-        },
-      });
-
-      // 3. CTA Band entrance
+      // Banda CTA
       if (ctaBandRef.current) {
         gsap.fromTo(
           ctaBandRef.current,
@@ -77,7 +66,7 @@ export default function Inversion() {
             scaleY: 1,
             y: 0,
             duration: 1.0,
-            ease: "expo.out",
+            ease: EASING.default,
             scrollTrigger: {
               trigger: ctaBandRef.current,
               start: "top 85%",
@@ -91,7 +80,11 @@ export default function Inversion() {
     return () => ctx.revert();
   }, []);
 
-  const { inversion } = PROYECTO_DATA;
+  const piesTarjeta = [
+    "Aplica a subsidios VIS",
+    "Precio más accesible",
+    "Última unidad comercial",
+  ];
 
   return (
     <section
@@ -120,114 +113,50 @@ export default function Inversion() {
         </div>
 
         {/* 3 Pricing Cards */}
-        <div className="grid-tarjetas-inversion grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-12">
-          {/* Card 1: Casa Esquinera */}
-          <div className="tarjeta-inversion relative bg-sp-navy-soft rounded-lg p-6 sm:p-8 border border-white/10 flex flex-col justify-between overflow-hidden shadow-xl">
-            <span className="absolute top-0 left-0 right-0 h-[2px] bg-sp-sand" />
-            <div>
-              <span className="font-sans text-xs uppercase tracking-wider text-sp-sand font-medium block mb-3">
-                {inversion.tarjetas[0].titulo}
-              </span>
-              <div className="mb-4">
-                <span className="font-display text-3xl sm:text-4xl lg:text-5xl text-sp-ivory font-normal tabular-nums">
-                  ${precioEsquinera}
+        <div
+          ref={gridRef}
+          className="grid-tarjetas-inversion grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-12"
+        >
+          {inversion.tarjetas.map((tarjeta, idx) => (
+            <div
+              key={tarjeta.tipo}
+              className="tarjeta-inversion relative bg-sp-navy-soft p-6 sm:p-8 border border-white/10 flex flex-col justify-between overflow-hidden"
+            >
+              <span className="absolute top-0 left-0 right-0 h-[2px] bg-sp-sand" />
+              <div>
+                <span className="font-sans text-xs uppercase tracking-wider text-sp-sand font-medium block mb-3">
+                  {tarjeta.titulo}
                 </span>
-                <span className="font-display text-sp-sand text-xl sm:text-2xl ml-1 font-normal">
-                  millones
-                </span>
+                <div className="mb-4 flex items-baseline">
+                  {/* min-w reserva el ancho: el conteo no desplaza "millones" */}
+                  <span className="font-display text-3xl sm:text-4xl lg:text-5xl text-sp-ivory font-normal tabular-nums inline-block min-w-[4ch]">
+                    ${precios[idx]}
+                  </span>
+                  <span className="font-display text-sp-sand text-xl sm:text-2xl ml-1 font-normal">
+                    millones
+                  </span>
+                </div>
+                <p className="font-sans text-xs sm:text-sm text-white/90 font-light leading-relaxed">
+                  {tarjeta.detalle}
+                </p>
               </div>
-              <p className="font-sans text-xs sm:text-sm text-white/80 font-light leading-relaxed">
-                {inversion.tarjetas[0].detalle}
-              </p>
-            </div>
 
-            <div className="pt-6 mt-6 border-t border-white/10 flex items-center justify-between">
-              <span className="font-sans text-[0.68rem] uppercase tracking-wider text-sp-sand">
-                Aplica a subsidios VIS
-              </span>
-              <a
-                href={PROYECTO_DATA.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sp-ivory hover:text-sp-sand transition-colors p-1"
-                aria-label="Consultar por Casa Esquinera"
-              >
-                <ArrowUpRight className="w-5 h-5 text-sp-sand" />
-              </a>
-            </div>
-          </div>
-
-          {/* Card 2: Casa Medianera */}
-          <div className="tarjeta-inversion relative bg-sp-navy-soft rounded-lg p-6 sm:p-8 border border-white/10 flex flex-col justify-between overflow-hidden shadow-xl">
-            <span className="absolute top-0 left-0 right-0 h-[2px] bg-sp-sand" />
-            <div>
-              <span className="font-sans text-xs uppercase tracking-wider text-sp-sand font-medium block mb-3">
-                {inversion.tarjetas[1].titulo}
-              </span>
-              <div className="mb-4">
-                <span className="font-display text-3xl sm:text-4xl lg:text-5xl text-sp-ivory font-normal tabular-nums">
-                  ${precioMedianera}
+              <div className="pt-6 mt-6 border-t border-white/10 flex items-center justify-between gap-3">
+                <span className="font-sans text-[0.68rem] uppercase tracking-wider text-sp-sand">
+                  {piesTarjeta[idx]}
                 </span>
-                <span className="font-display text-sp-sand text-xl sm:text-2xl ml-1 font-normal">
-                  millones
-                </span>
+                <a
+                  href={PROYECTO_DATA.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-sans text-[0.68rem] uppercase tracking-wider text-sp-ivory border-b border-sp-sand/50 hover:border-sp-sand hover:text-sp-sand transition-colors pb-0.5 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand"
+                >
+                  Consultar
+                  <span className="sr-only"> por {tarjeta.titulo} por WhatsApp</span>
+                </a>
               </div>
-              <p className="font-sans text-xs sm:text-sm text-white/80 font-light leading-relaxed">
-                {inversion.tarjetas[1].detalle}
-              </p>
             </div>
-
-            <div className="pt-6 mt-6 border-t border-white/10 flex items-center justify-between">
-              <span className="font-sans text-[0.68rem] uppercase tracking-wider text-sp-sand">
-                Precio más accesible
-              </span>
-              <a
-                href={PROYECTO_DATA.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sp-ivory hover:text-sp-sand transition-colors p-1"
-                aria-label="Consultar por Casa Medianera"
-              >
-                <ArrowUpRight className="w-5 h-5 text-sp-sand" />
-              </a>
-            </div>
-          </div>
-
-          {/* Card 3: Local Comercial */}
-          <div className="tarjeta-inversion relative bg-sp-navy-soft rounded-lg p-6 sm:p-8 border border-white/10 flex flex-col justify-between overflow-hidden shadow-xl">
-            <span className="absolute top-0 left-0 right-0 h-[2px] bg-sp-sand" />
-            <div>
-              <span className="font-sans text-xs uppercase tracking-wider text-sp-sand font-medium block mb-3">
-                {inversion.tarjetas[2].titulo}
-              </span>
-              <div className="mb-4">
-                <span className="font-display text-3xl sm:text-4xl lg:text-5xl text-sp-ivory font-normal tabular-nums">
-                  ${precioLocal}
-                </span>
-                <span className="font-display text-sp-sand text-xl sm:text-2xl ml-1 font-normal">
-                  millones
-                </span>
-              </div>
-              <p className="font-sans text-xs sm:text-sm text-white/80 font-light leading-relaxed">
-                {inversion.tarjetas[2].detalle}
-              </p>
-            </div>
-
-            <div className="pt-6 mt-6 border-t border-white/10 flex items-center justify-between">
-              <span className="font-sans text-[0.68rem] uppercase tracking-wider text-sp-sand">
-                Última unidad comercial
-              </span>
-              <a
-                href={PROYECTO_DATA.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sp-ivory hover:text-sp-sand transition-colors p-1"
-                aria-label="Consultar por Local Comercial"
-              >
-                <ArrowUpRight className="w-5 h-5 text-sp-sand" />
-              </a>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Two Legal/Operational Notes with Square Sand Bullets */}
@@ -235,10 +164,13 @@ export default function Inversion() {
           {inversion.notas.map((nota, idx) => (
             <div
               key={idx}
-              className="flex items-start gap-3 p-4 rounded bg-sp-navy-soft/60 border border-white/5"
+              className="flex items-start gap-3 p-4 bg-sp-navy-soft/60 border border-white/10"
             >
-              <Square className="w-3.5 h-3.5 text-sp-sand fill-sp-sand mt-1 flex-shrink-0" />
-              <p className="font-sans text-xs text-white/80 font-light leading-relaxed">
+              <span
+                className="mt-1.5 h-2 w-2 shrink-0 bg-sp-sand"
+                aria-hidden="true"
+              />
+              <p className="font-sans text-xs text-white/90 font-light leading-relaxed">
                 {nota}
               </p>
             </div>
@@ -248,7 +180,7 @@ export default function Inversion() {
         {/* Full-width CTA Band (Background --sp-sand) */}
         <div
           ref={ctaBandRef}
-          className="relative w-full bg-sp-sand text-sp-navy rounded-lg p-6 sm:p-8 lg:p-10 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6"
+          className="relative w-full bg-sp-sand text-sp-navy p-6 sm:p-8 lg:p-10 flex flex-col md:flex-row items-center justify-between gap-6"
         >
           <div className="flex flex-col text-center md:text-left">
             <span className="font-sans text-[0.7rem] uppercase tracking-kicker font-bold text-sp-navy/90 mb-1">
@@ -259,18 +191,29 @@ export default function Inversion() {
             </p>
           </div>
 
-          <a
-            href={PROYECTO_DATA.whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 px-6 sm:px-8 py-4 rounded-md bg-sp-navy text-sp-ivory hover:bg-sp-navy-deep font-sans text-base sm:text-lg tracking-wider uppercase font-semibold transition-all duration-300 shadow-md hover:-translate-y-0.5 group focus:outline-none min-h-[48px]"
-            aria-label="Escribir por WhatsApp al 324 358 2526"
-          >
-            <MessageCircle className="w-6 h-6 text-sp-sand group-hover:scale-110 transition-transform" />
-            <span className="group-hover:text-sp-sand transition-colors font-medium">
-              {inversion.cta.telefono}
-            </span>
-          </a>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+            <a
+              href={PROYECTO_DATA.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-4 bg-sp-navy text-sp-ivory hover:bg-sp-navy-deep font-sans text-base sm:text-lg tracking-wider uppercase font-semibold transition-colors duration-300 group focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-navy min-h-[48px]"
+              aria-label={`Escribir por WhatsApp al ${PROYECTO_DATA.telefonoInternacional}`}
+            >
+              <MessageCircle className="w-6 h-6 text-sp-sand" />
+              <span className="group-hover:text-sp-sand transition-colors font-medium">
+                {inversion.cta.telefono}
+              </span>
+            </a>
+
+            {/* En móvil, llamar de un toque */}
+            <a
+              href={PROYECTO_DATA.telefonoHref}
+              className="inline-flex items-center justify-center px-6 py-4 border-2 border-sp-navy text-sp-navy hover:bg-sp-navy hover:text-sp-ivory font-sans text-sm tracking-wider uppercase font-medium transition-colors duration-300 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-navy min-h-[48px]"
+            >
+              Llamar
+              <span className="sr-only"> al {PROYECTO_DATA.telefonoInternacional}</span>
+            </a>
+          </div>
         </div>
       </div>
     </section>

@@ -17,20 +17,32 @@ const config: Config = {
     },
     extend: {
       colors: {
+        // Los tokens viven en globals.css como canales RGB sueltos ("44 56 66").
+        // El wrapper rgb(... / <alpha-value>) es lo que permite bg-sp-navy/40,
+        // from-sp-navy-deep/95, divide-sp-steel/10, etc.
         sp: {
-          navy: "var(--sp-navy)",
-          "navy-deep": "var(--sp-navy-deep)",
-          "navy-soft": "var(--sp-navy-soft)",
-          steel: "var(--sp-steel)",
-          "steel-ink": "var(--sp-steel-ink)",
-          "steel-mute": "var(--sp-steel-mute)",
-          cream: "var(--sp-cream)",
-          white: "var(--sp-white)",
-          sand: "var(--sp-sand)",
-          ivory: "var(--sp-ivory)",
-          gold: "var(--sp-gold)",
-          sold: "var(--sp-sold)",
+          navy: "rgb(var(--sp-navy) / <alpha-value>)",
+          "navy-deep": "rgb(var(--sp-navy-deep) / <alpha-value>)",
+          "navy-soft": "rgb(var(--sp-navy-soft) / <alpha-value>)",
+          steel: "rgb(var(--sp-steel) / <alpha-value>)",
+          "steel-ink": "rgb(var(--sp-steel-ink) / <alpha-value>)",
+          "steel-mute": "rgb(var(--sp-steel-mute) / <alpha-value>)",
+          cream: "rgb(var(--sp-cream) / <alpha-value>)",
+          white: "rgb(var(--sp-white) / <alpha-value>)",
+          sand: "rgb(var(--sp-sand) / <alpha-value>)",
+          ivory: "rgb(var(--sp-ivory) / <alpha-value>)",
+          gold: "rgb(var(--sp-gold) / <alpha-value>)",
+          sold: "rgb(var(--sp-sold) / <alpha-value>)",
         },
+      },
+      keyframes: {
+        "fade-in": {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        "fade-in": "fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both",
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],

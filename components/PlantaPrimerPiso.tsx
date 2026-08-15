@@ -5,9 +5,11 @@ import Image from "next/image";
 import { PROYECTO_DATA } from "@/data/proyecto";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "@/lib/animations";
-import PlanLightbox from "./PlanLightbox";
-import { Maximize2 } from "lucide-react";
+import dynamic from "next/dynamic";
+import { prefersReducedMotion, EASING, DURATION } from "@/lib/animations";
+
+// El lightbox solo se monta al hacer clic: fuera del bundle inicial.
+const PlanLightbox = dynamic(() => import("./PlanLightbox"), { ssr: false });
 
 export default function PlantaPrimerPiso() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -29,8 +31,8 @@ export default function PlantaPrimerPiso() {
           {
             clipPath: "inset(0 0% 0 0)",
             opacity: 1,
-            duration: 1.0,
-            ease: "power3.out",
+            duration: DURATION.text,
+            ease: EASING.entrance,
             scrollTrigger: {
               trigger: sectionRef.current,
               start: "top 75%",
@@ -47,9 +49,9 @@ export default function PlantaPrimerPiso() {
         {
           opacity: 1,
           x: 0,
-          duration: 0.6,
+          duration: DURATION.fast * 2,
           stagger: 0.07,
-          ease: "expo.out",
+          ease: EASING.default,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 70%",
@@ -66,8 +68,8 @@ export default function PlantaPrimerPiso() {
           {
             scale: 1,
             opacity: 1,
-            duration: 1.1,
-            ease: "expo.out",
+            duration: DURATION.media,
+            ease: EASING.default,
             scrollTrigger: {
               trigger: sectionRef.current,
               start: "top 75%",
@@ -98,21 +100,20 @@ export default function PlantaPrimerPiso() {
     <>
       <section
         ref={sectionRef}
-        id="planos"
+        id="primer-piso"
         aria-labelledby="titulo-primer-piso"
-        className="relative w-full bg-sp-cream py-16 sm:py-24 px-6 sm:px-8 lg:px-16 border-b border-sp-steel/15"
+        className="relative w-full bg-sp-cream pt-8 pb-16 sm:pt-10 sm:pb-24 px-6 sm:px-8 lg:px-16 border-b border-sp-steel/15"
       >
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* LEFT 40%: Steel panel with metadata and spaces list */}
             <div
               ref={panelRef}
-              className="lg:col-span-5 bg-sp-steel text-white rounded-lg p-6 sm:p-8 lg:p-10 shadow-xl flex flex-col justify-between"
+              className="lg:col-span-5 bg-sp-steel text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-between shadow-xl relative overflow-hidden"
             >
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-sp-sand via-sp-gold to-sp-sand" />
+
               <div>
-                <span className="font-sans text-[0.72rem] tracking-kicker uppercase text-sp-sand font-normal block mb-2">
-                  {primerPiso.kicker}
-                </span>
                 <h3
                   id="titulo-primer-piso"
                   className="font-display font-normal text-sp-ivory text-2xl sm:text-3xl lg:text-4xl uppercase tracking-tight mb-2"
@@ -128,10 +129,15 @@ export default function PlantaPrimerPiso() {
                   {primerPiso.espacios.map((espacio, idx) => (
                     <div
                       key={idx}
-                      className="espacio-primer-piso py-2.5 flex items-center justify-between font-sans text-xs sm:text-sm text-white/90 font-light hover:text-sp-sand transition-colors"
+                      className="espacio-primer-piso group py-2.5 flex items-center justify-between font-sans text-xs sm:text-sm text-white/90 font-light hover:text-sp-ivory hover:bg-white/5 px-2 rounded transition-all cursor-default"
                     >
-                      <span>{espacio.nombre}</span>
-                      <span className="font-medium text-sp-sand tabular-nums">
+                      <span className="flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                        <span className="text-sp-gold text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                          ✦
+                        </span>
+                        {espacio.nombre}
+                      </span>
+                      <span className="font-semibold text-sp-gold tabular-nums px-2 py-0.5 bg-sp-navy/40 rounded border border-sp-sand/20 group-hover:border-sp-gold/50 transition-colors">
                         {espacio.cantidad}
                       </span>
                     </div>
@@ -141,20 +147,20 @@ export default function PlantaPrimerPiso() {
 
               {/* Bottom Figures */}
               <div className="pt-6 border-t border-white/20 mt-4">
-                <p className="font-sans text-[0.7rem] uppercase tracking-wider text-sp-sand font-normal mb-3">
+                <p className="font-sans text-[0.7rem] uppercase tracking-wider text-sp-sand font-medium mb-3">
                   {primerPiso.notaArea}
                 </p>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-sp-navy/40 p-3 rounded border border-white/10">
-                    <span className="font-sans text-[0.65rem] uppercase tracking-wider text-white/70 block">
+                  <div className="bg-sp-navy/50 p-3.5 border border-white/15 rounded-sm hover:border-sp-sand/40 transition-colors shadow-inner">
+                    <span className="font-sans text-[0.65rem] uppercase tracking-wider text-sp-sand block font-medium">
                       Esquinera
                     </span>
                     <span className="font-display text-sp-ivory text-xl sm:text-2xl font-normal tabular-nums">
                       {primerPiso.cifras.esquinera}
                     </span>
                   </div>
-                  <div className="bg-sp-navy/40 p-3 rounded border border-white/10">
-                    <span className="font-sans text-[0.65rem] uppercase tracking-wider text-white/70 block">
+                  <div className="bg-sp-navy/50 p-3.5 border border-white/15 rounded-sm hover:border-sp-sand/40 transition-colors shadow-inner">
+                    <span className="font-sans text-[0.65rem] uppercase tracking-wider text-sp-sand block font-medium">
                       Medianera
                     </span>
                     <span className="font-display text-sp-ivory text-xl sm:text-2xl font-normal tabular-nums">
@@ -168,14 +174,14 @@ export default function PlantaPrimerPiso() {
             {/* RIGHT 60%: Plan Architectural Render */}
             <div
               ref={planContainerRef}
-              className="lg:col-span-7 bg-sp-white rounded-lg p-4 sm:p-6 shadow-md border border-sp-steel/15 flex flex-col items-center group relative"
+              className="sp-card-interactive lg:col-span-7 bg-sp-white p-4 sm:p-6 border border-sp-steel/20 shadow-md flex flex-col items-center group relative overflow-hidden"
             >
-              <div className="relative w-full aspect-[4/3] max-h-[500px] overflow-hidden rounded">
+              <div className="relative w-full aspect-[4/3] max-h-[500px] overflow-hidden">
                 <Image
                   src="/img/plano-primer-piso.jpg"
                   alt="Plano arquitectónico del primer piso, unidades pareadas de Urbanización San Pablo"
                   fill
-                  className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                  className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
                   sizes="(max-width: 1024px) 100vw, 60vw"
                 />
 
@@ -184,9 +190,8 @@ export default function PlantaPrimerPiso() {
                   type="button"
                   onClick={() => setLightboxOpen(true)}
                   aria-label="Ver plano de primer piso ampliado"
-                  className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded bg-sp-navy/85 hover:bg-sp-navy text-sp-ivory text-xs font-sans tracking-wide transition-all shadow-md backdrop-blur-sm"
+                  className="absolute bottom-3 right-3 flex items-center px-3.5 py-1.5 bg-sp-navy/95 hover:bg-sp-navy text-sp-sand hover:text-sp-ivory border border-sp-sand/30 hover:border-sp-gold text-xs font-sans tracking-kicker uppercase transition-all shadow-lg backdrop-blur-sm focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sp-sand"
                 >
-                  <Maximize2 className="w-3.5 h-3.5 text-sp-sand" />
                   <span>Ver ampliado</span>
                 </button>
               </div>
@@ -194,7 +199,7 @@ export default function PlantaPrimerPiso() {
               {/* Plan Caption */}
               <div className="w-full flex items-center justify-between pt-3 text-[0.7rem] font-sans text-sp-steel tracking-kicker uppercase border-t border-sp-steel/10 mt-2">
                 <span>{primerPiso.pie}</span>
-                <span className="text-sp-steel-mute">Primer Nivel</span>
+                <span className="text-sp-steel font-medium">Primer Nivel</span>
               </div>
             </div>
           </div>
@@ -206,6 +211,7 @@ export default function PlantaPrimerPiso() {
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
         imageSrc="/img/plano-primer-piso.jpg"
+        imageAlt="Plano arquitectónico ampliado del primer piso de las casas VIS de Urbanización San Pablo en Soracá, Boyacá: 31,715 m² en la esquinera y 30,385 m² en la medianera, con garaje cubierto, sala, comedor, cocina y baño social."
         title="Plano Primer Piso · Unidades Pareadas"
         subtitle={primerPiso.subtitulo}
       />

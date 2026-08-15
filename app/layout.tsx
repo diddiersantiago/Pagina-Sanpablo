@@ -1,27 +1,56 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Jost } from "next/font/google";
+import { PROYECTO_DATA } from "@/data/proyecto";
+import { SITE_URL, SITE_NAME, PRECIOS_VIGENTES_HASTA } from "@/lib/site";
 import "./globals.css";
 
+/*
+ * Fuentes:
+ *  · Sin `weight`: ambas son variables, así que se sirve el eje completo
+ *    (font-weight: 100 900 en Jost, 400 900 en Playfair). font-semibold y
+ *    font-bold pasan a ser pesos reales en vez de negrita sintética, que es
+ *    justo lo que arruina una didone. No cuesta un byte extra: es el mismo
+ *    archivo variable que ya se descargaba.
+ *  · Jost pierde `italic` (~50 kB): las cursivas las pone Playfair.
+ *  · Ambas pierden `latin-ext` (~79 kB): lo único que lo forzaba eran los
+ *    ordinales voladitos "3.ᵉʳ", ahora escritos "3er".
+ *
+ * Sobre el preload de fuentes (3.4): Next 15.5.23 NO emite
+ * <link rel="preload" as="font">. Verificado que la causa no es nuestra
+ * configuración — `next-font-manifest.json` sale con `"app": {}` y sigue vacío
+ * tanto aplicando `className` como usando solo `variable`, y tanto con pesos
+ * fijados como con el eje variable. El CSS y los .woff2 sí se generan bien.
+ * Impacto real acotado: el LCP es el logo (ese sí lleva preload de imagen),
+ * `display: swap` evita el texto invisible y Next genera fallbacks ajustados
+ * por métrica ("Playfair Display Fallback"), que absorben el CLS del swap.
+ * No se fuerza un preload manual porque el hash del archivo cambia en cada
+ * build y quedaría desincronizado.
+ */
 const playfair = Playfair_Display({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500"],
+  subsets: ["latin"],
   style: ["normal", "italic"],
   variable: "--font-display",
   display: "swap",
+  preload: true,
 });
 
 const jost = Jost({
-  subsets: ["latin", "latin-ext"],
-  weight: ["300", "400", "500"],
-  style: ["normal", "italic"],
+  subsets: ["latin"],
+  style: ["normal"],
   variable: "--font-sans",
   display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
-  title: "Urbanización San Pablo · Casas VIS en Soracá, Boyacá | Desde $147 millones",
+  metadataBase: new URL(SITE_URL),
+  // 52 caracteres: entra completo en el SERP (~60).
+  title: "Urbanización San Pablo · Casas VIS en Soracá, Boyacá",
+  // 141 caracteres, con precio y ubicación adelantados.
   description:
-    "Proyecto VIS en Soracá, Boyacá: casas de 75,57 y 79,92 m² en ladrillo a la vista, con garaje, balcones y planos para ampliar un tercer piso. Aplica a subsidios. Desde $147 millones.",
+    "Casas VIS en Soracá, Boyacá, a minutos de Tunja, desde $147 millones: 75,57 y 79,92 m² con garaje, balcones y planos para ampliar un 3er piso.",
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_NAME }],
   keywords: [
     "Urbanización San Pablo",
     "Casas VIS Soracá",
@@ -29,34 +58,217 @@ export const metadata: Metadata = {
     "Casas cerca a Tunja",
     "Subsidio Mi Casa Ya",
     "Comfaboy vivienda",
-    "Casas con garaje Soraca",
+    "Casas con garaje Soracá",
   ],
-  authors: [{ name: "Urbanización San Pablo" }],
-  metadataBase: new URL("https://urbanizacionsanpablo.com"),
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
     title: "Urbanización San Pablo · Casas VIS en Soracá, Boyacá",
     description:
-      "Casas VIS de 75,57 y 79,92 m² con garaje cubierto, balcones y planos para ampliar un 3.ᵉʳ piso. Desde $147 millones.",
-    url: "https://urbanizacionsanpablo.com",
-    siteName: "Urbanización San Pablo",
+      "Casas VIS de 75,57 y 79,92 m² con garaje cubierto, balcones y planos para ampliar un 3er piso. Desde $147 millones.",
+    url: SITE_URL,
+    siteName: SITE_NAME,
     locale: "es_CO",
     type: "website",
-    images: [
-      {
-        url: "/img/render-fachadas.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Fachadas en ladrillo a la vista de Urbanización San Pablo, Soracá, Boyacá",
-      },
-    ],
+    // La imagen la aporta app/opengraph-image.tsx (1200×630 exactos).
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Urbanización San Pablo · Casas VIS en Soracá, Boyacá",
+    description:
+      "Casas VIS de 75,57 y 79,92 m² con garaje, balcones y planos para ampliar un 3er piso. Desde $147 millones.",
   },
   alternates: {
     canonical: "/",
   },
-  icons: {
-    icon: "/img/logo-san-pablo.png",
-    apple: "/img/logo-san-pablo.png",
+  // Sin bloque `icons`: lo resuelven app/icon.png, app/apple-icon.png y
+  // app/favicon.ico por convención de archivo.
+};
+
+export const viewport: Viewport = {
+  themeColor: "#2C3842",
+  width: "device-width",
+  initialScale: 1,
+};
+
+const ORG_ID = `${SITE_URL}/#promotor`;
+const WEBSITE_ID = `${SITE_URL}/#website`;
+const PAGE_ID = `${SITE_URL}/#pagina`;
+
+const { ubicacionSeccion, inversion, areas, faq } = PROYECTO_DATA;
+
+const postalAddress = {
+  "@type": "PostalAddress",
+  ...(ubicacionSeccion.direccion ? { streetAddress: ubicacionSeccion.direccion } : {}),
+  addressLocality: "Soracá",
+  addressRegion: "Boyacá",
+  addressCountry: "CO",
+};
+
+/**
+ * Producto multi-tipado: `Product` aporta `offers`, `SingleFamilyResidence`
+ * aporta `floorSize` / `numberOfBedrooms`. Es la forma válida de combinarlos;
+ * `RealEstateListing` es un tipo de PÁGINA y no admite `offers` ni `address`.
+ */
+const vivienda = (opts: {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  areaTotal: number;
+  areaConstruida: number;
+}) => ({
+  "@type": ["Product", "SingleFamilyResidence"],
+  "@id": `${SITE_URL}/#${opts.id}`,
+  name: opts.name,
+  description: opts.description,
+  category: "Vivienda de Interés Social",
+  address: postalAddress,
+  numberOfBedrooms: 2,
+  numberOfBathroomsTotal: 3,
+  numberOfFullBathrooms: 2,
+  numberOfRooms: 2,
+  floorSize: {
+    "@type": "QuantitativeValue",
+    value: opts.areaTotal,
+    unitCode: "MTK",
   },
+  additionalProperty: {
+    "@type": "PropertyValue",
+    name: "Área construida en la entrega",
+    value: opts.areaConstruida,
+    unitCode: "MTK",
+  },
+  offers: {
+    "@type": "Offer",
+    price: opts.price,
+    priceCurrency: "COP",
+    availability: "https://schema.org/InStock",
+    priceValidUntil: PRECIOS_VIGENTES_HASTA,
+    url: SITE_URL,
+    seller: { "@id": ORG_ID },
+  },
+});
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    // NAP estructurado
+    {
+      "@type": "RealEstateAgent",
+      "@id": ORG_ID,
+      name: SITE_NAME,
+      description:
+        "Proyecto de Vivienda de Interés Social (VIS) en Soracá, Boyacá, a minutos de Tunja: casas de dos pisos con planos para ampliación a tercer piso y un local comercial.",
+      url: SITE_URL,
+      image: `${SITE_URL}/img/render-fachadas.jpg`,
+      logo: `${SITE_URL}/icon-512.png`,
+      telephone: "+573243582526",
+      priceRange: "$$",
+      address: postalAddress,
+      areaServed: ubicacionSeccion.ciudadesServidas.map((nombre) => ({
+        "@type": "Place",
+        name: nombre,
+      })),
+      // TODO CLIENTE: añadir `geo` y `openingHoursSpecification` cuando se
+      // confirmen coordenadas y horario de la sala de ventas.
+      ...(ubicacionSeccion.geo.lat && ubicacionSeccion.geo.lng
+        ? {
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: ubicacionSeccion.geo.lat,
+              longitude: ubicacionSeccion.geo.lng,
+            },
+          }
+        : {}),
+    },
+
+    // Una oferta por tipología
+    vivienda({
+      id: "casa-esquinera",
+      name: "Casa esquinera VIS · Urbanización San Pablo",
+      description: inversion.tarjetas[0].detalle,
+      price: 170000000,
+      areaTotal: areas.tipologias[0].totalNum,
+      areaConstruida: 59.33,
+    }),
+    vivienda({
+      id: "casa-medianera",
+      name: "Casa medianera VIS · Urbanización San Pablo",
+      description: inversion.tarjetas[1].detalle,
+      price: 147000000,
+      areaTotal: areas.tipologias[1].totalNum,
+      areaConstruida: 55.88,
+    }),
+    {
+      "@type": "Product",
+      "@id": `${SITE_URL}/#local-1`,
+      name: "Local comercial 1 · Urbanización San Pablo",
+      description: inversion.tarjetas[2].detalle,
+      category: "Local comercial",
+      floorSize: {
+        "@type": "QuantitativeValue",
+        value: 70.4,
+        unitCode: "MTK",
+      },
+      offers: {
+        "@type": "Offer",
+        price: 217000000,
+        priceCurrency: "COP",
+        availability: "https://schema.org/InStock",
+        priceValidUntil: PRECIOS_VIGENTES_HASTA,
+        url: `${SITE_URL}/#local`,
+        seller: { "@id": ORG_ID },
+      },
+    },
+    // Los locales 2 y 3 están vendidos y no se publican como oferta.
+
+    {
+      "@type": "WebSite",
+      "@id": WEBSITE_ID,
+      url: SITE_URL,
+      name: SITE_NAME,
+      inLanguage: "es-CO",
+      publisher: { "@id": ORG_ID },
+    },
+
+    {
+      "@type": ["WebPage", "RealEstateListing"],
+      "@id": PAGE_ID,
+      url: SITE_URL,
+      name: "Urbanización San Pablo · Casas VIS en Soracá, Boyacá",
+      inLanguage: "es-CO",
+      isPartOf: { "@id": WEBSITE_ID },
+      about: { "@id": ORG_ID },
+      mainEntity: { "@id": `${SITE_URL}/#casa-medianera` },
+      primaryImageOfPage: `${SITE_URL}/img/render-fachadas.jpg`,
+      datePublished: "2026-01-01",
+    },
+
+    {
+      "@type": "FAQPage",
+      "@id": `${SITE_URL}/#faq`,
+      isPartOf: { "@id": PAGE_ID },
+      // Cada acceptedAnswer es literalmente el texto visible del acordeón.
+      mainEntity: faq.preguntas.map((p) => ({
+        "@type": "Question",
+        name: p.pregunta,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: p.respuesta,
+        },
+      })),
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -64,45 +276,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "RealEstateListing",
-    name: "Urbanización San Pablo",
-    description:
-      "Proyecto de Vivienda de Interés Social (VIS) en Soracá, Boyacá. Casas de dos pisos con planos para ampliación a tercer piso y locales comerciales.",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Soracá",
-      addressRegion: "Boyacá",
-      addressCountry: "CO",
-    },
-    telephone: "+573243582526",
-    priceRange: "$147.000.000 COP - $217.000.000 COP",
-    offers: [
-      {
-        "@type": "Offer",
-        name: "Casa Medianera VIS",
-        price: "147000000",
-        priceCurrency: "COP",
-        category: "Vivienda de Interés Social",
-      },
-      {
-        "@type": "Offer",
-        name: "Casa Esquinera VIS",
-        price: "170000000",
-        priceCurrency: "COP",
-        category: "Vivienda de Interés Social",
-      },
-      {
-        "@type": "Offer",
-        name: "Local Comercial 1",
-        price: "217000000",
-        priceCurrency: "COP",
-        category: "Local Comercial",
-      },
-    ],
-  };
-
   return (
     <html lang="es-CO" className={`${playfair.variable} ${jost.variable}`}>
       <head>

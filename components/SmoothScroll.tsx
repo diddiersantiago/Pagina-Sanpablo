@@ -5,16 +5,22 @@ import { initLenis } from "@/lib/animations";
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    let lenisInstance: any = null;
+    let cancelled = false;
+    let cleanup: (() => void) | null = null;
 
-    initLenis().then((lenis) => {
-      lenisInstance = lenis;
+    initLenis().then((dispose) => {
+      // En StrictMode el efecto se desmonta antes de que resuelva la promesa:
+      // sin este guard queda una instancia huérfana con su ticker vivo.
+      if (cancelled) {
+        dispose?.();
+        return;
+      }
+      cleanup = dispose;
     });
 
     return () => {
-      if (lenisInstance) {
-        lenisInstance.destroy();
-      }
+      cancelled = true;
+      cleanup?.();
     };
   }, []);
 

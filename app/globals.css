@@ -2,35 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Los tokens se declaran como CANALES RGB (sin la función rgb()) para que
+ * Tailwind pueda componer alfa sobre ellos vía `rgb(var(--token) / <alpha-value>)`.
+ * Si se declaran como #HEX o rgb(...) completo, Tailwind descarta toda clase
+ * con opacidad (bg-sp-navy/40, from-sp-navy-deep/95, …).
+ */
 :root {
   /* Base oscura — fondo dominante de portada, cierre y bloques de énfasis */
-  --sp-navy:        #2C3842;  /* azul carbón, color madre de la marca */
-  --sp-navy-deep:   #25313C;  /* variante más profunda, para vignettes y sombras */
-  --sp-navy-soft:   #323E49;  /* hover de superficies oscuras */
+  --sp-navy:        38 48 58;    /* #26303A azul carbón, color madre de la marca */
+  --sp-navy-deep:   26 34 42;    /* #1A222A variante más profunda para contraste e inmersión */
+  --sp-navy-soft:   48 60 72;    /* #303C48 hover y tarjetas oscuras */
 
   /* Azul acero — segundo color estructural (paneles, tablas, eyebrows) */
-  --sp-steel:       #526778;  /* paneles laterales, encabezado de tabla, kickers */
-  --sp-steel-ink:   #3E4D5B;  /* color de TEXTO de cuerpo sobre fondo claro */
-  --sp-steel-mute:  #72828E;  /* texto secundario / metadatos */
+  --sp-steel:       74 94 110;   /* #4A5E6E paneles laterales, encabezado de tabla, kickers */
+  --sp-steel-ink:   46 58 70;    /* #2E3A46 color de TEXTO de cuerpo de alto contraste */
+  --sp-steel-mute:  105 120 132; /* #697884 texto secundario / metadatos */
 
-  /* Base clara — fondo dominante de las secciones informativas */
-  --sp-cream:       #F7F2EB;  /* crema cálido, fondo principal claro */
-  --sp-white:       #FFFFFF;  /* tarjetas y planos sobre crema */
+  /* Base clara — fondo luminoso de las secciones informativas */
+  --sp-cream:       249 246 240; /* #F9F6F0 crema cálido sedoso */
+  --sp-white:       255 255 255; /* #FFFFFF tarjetas y planos sobre crema */
 
-  /* Acentos */
-  --sp-sand:        #C6B799;  /* arena/dorado mate — banda CTA, subrayados, viñetas */
-  --sp-ivory:       #EADFC7;  /* marfil cálido — TITULARES sobre fondo navy */
-  --sp-gold:        #D6A44B;  /* dorado del logotipo — usar con MUCHA moderación */
+  /* Acentos dorados y cálidos del Ayudaventas */
+  --sp-sand:        206 186 148; /* #CEBA94 arena dorado champaña — banda CTA, subrayados, detalles */
+  --sp-ivory:       244 236 220; /* #F4ECDC marfil radiante — TITULARES sobre fondo navy */
+  --sp-gold:        222 173 78;  /* #DEAD4E dorado noble del logotipo y acentos de valor */
 
   /* Estado */
-  --sp-sold:        #A4443B;  /* terracota apagado — etiqueta VENDIDO */
+  --sp-sold:        185 58 48;   /* #B93A30 terracota auténtico — sello VENDIDO */
 }
 
 /* Base resets & typography */
 html {
   scroll-behavior: auto; /* Managed by Lenis */
-  background-color: var(--sp-navy);
-  color: var(--sp-steel-ink);
+  background-color: rgb(var(--sp-navy));
+  color: rgb(var(--sp-steel-ink));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -38,7 +44,13 @@ html {
 body {
   overflow-x: hidden;
   font-family: var(--font-sans), system-ui, sans-serif;
-  background-color: var(--sp-navy);
+  background-color: rgb(var(--sp-navy));
+}
+
+/* Con el header fijo, las anclas deben dejar aire arriba para no tapar el titular */
+section[id],
+main[id] {
+  scroll-margin-top: 6rem;
 }
 
 /* Tabular figures for exact alignment in numbers, tables, meters */
@@ -49,9 +61,29 @@ body {
 /* Focus styles for strict accessibility */
 a:focus-visible,
 button:focus-visible,
-input:focus-visible {
-  outline: 2px solid var(--sp-sand);
+input:focus-visible,
+summary:focus-visible {
+  outline: 2px solid rgb(var(--sp-sand));
   outline-offset: 3px;
+}
+
+/* Skip link — primer tabulador de la página */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 200;
+}
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: rgb(var(--sp-sand));
+  color: rgb(var(--sp-navy));
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 /* Reading Progress Bar */
@@ -59,34 +91,35 @@ input:focus-visible {
   position: fixed;
   top: 0;
   left: 0;
-  height: 2px;
-  background: var(--sp-sand);
+  height: 3px;
+  background: linear-gradient(90deg, rgb(var(--sp-sand)), rgb(var(--sp-gold)));
   z-index: 100;
   transform-origin: 0% 50%;
   width: 100%;
   transform: scaleX(0);
   pointer-events: none;
+  box-shadow: 0 0 8px rgb(var(--sp-gold) / 0.5);
 }
 
 /* Selection */
 ::selection {
-  background: var(--sp-sand);
-  color: var(--sp-navy);
+  background: rgb(var(--sp-gold));
+  color: rgb(var(--sp-navy));
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--sp-navy-deep);
+  background: rgb(var(--sp-navy-deep));
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--sp-steel);
-  border-radius: 3px;
+  background: rgb(var(--sp-steel));
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--sp-sand);
+  background: rgb(var(--sp-gold));
 }
 
 /* Smooth reveal masks */
@@ -120,11 +153,11 @@ input:focus-visible {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(214, 164, 75, 0.18) 50%,
+    rgb(var(--sp-gold) / 0.28) 50%,
     transparent 100%
   );
   transform: translateX(-100%) rotate(25deg);
-  animation: shimmer-sweep 1.8s ease-in-out 1.2s forwards;
+  animation: shimmer-sweep 2.4s ease-in-out 1.5s infinite;
   pointer-events: none;
 }
 
@@ -142,6 +175,73 @@ input:focus-visible {
   animation: subtle-bounce 2s ease-in-out infinite;
 }
 
+/* Floating animation for subtle dynamism */
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float {
+  animation: float-slow 4s ease-in-out infinite;
+}
+
+/* Pulse glow for highlights */
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* FAB de WhatsApp */
+@keyframes fab-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fab-enter {
+  opacity: 0;
+  animation: fab-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 1.8s forwards;
+}
+
+/* Card hover transitions */
+.sp-card-interactive {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sp-card-interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px -8px rgba(38, 48, 58, 0.12), 0 4px 12px -2px rgba(38, 48, 58, 0.04);
+}
+
+.sp-card-dark-interactive {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sp-card-dark-interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.4), 0 0 20px -4px rgb(var(--sp-gold) / 0.15);
+  border-color: rgb(var(--sp-sand) / 0.4);
+}
+
 /* Reduced Motion Override */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -155,5 +255,11 @@ input:focus-visible {
   .animate-subtle-bounce,
   .animate-shimmer::after {
     animation: none !important;
+  }
+  /* El FAB debe quedar visible, no congelado en su estado inicial */
+  .animate-fab-enter {
+    opacity: 1;
+    animation: none !important;
+    transform: none;
   }
 }
